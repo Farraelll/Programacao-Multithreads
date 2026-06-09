@@ -45,10 +45,10 @@ void liberarMatriz(int** matriz, int tamanho) {
 }
 
 bool calcularPrimo(int numero) {
-	if (n == 0 || n == 1) {
+	if (numero == 0 || numero == 1) {
 		return false;
 	}
-	if (n == 2) {
+	if (numero == 2) {
 		return true;
 	}
 	for (int n = 3; n <= sqrt(numero); n++) {
@@ -60,8 +60,8 @@ bool calcularPrimo(int numero) {
 }
 
 void imprimirMatriz(int** matriz, int tamanho) {
-	for (i = 0; i < tamanho; i++) {
-		for (j = 0; j < tamanho; j++) {
+	for (int i = 0; i < tamanho; i++) {
+		for (int j = 0; j < tamanho; j++) {
 			printf("%d ", matriz[i][j]);
 		}
 		printf("\n");
