@@ -4,9 +4,13 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <math.h>
+#include <semaphore.h>
 
 #define TAMANHO_MATRIZ 10
 #define SEMENTE 2
+#define QTD_THREADS 6
+#define DIV_MACROBLOCO 9
+pthread_mutex_t mutex;
 
 int** criarMatrizAleatoria(int tamanho) {
    //Cria a matriz de endereços para outras matrizes e verifica se foi possível alocar a memória
@@ -45,10 +49,10 @@ void liberarMatriz(int** matriz, int tamanho) {
 }
 
 bool calcularPrimo(int numero) {
-	if (n == 0 || n == 1) {
+	if (numero == 0 || numero == 1) {
 		return false;
 	}
-	if (n == 2) {
+	if (numero == 2) {
 		return true;
 	}
 	for (int n = 3; n <= sqrt(numero); n++) {
@@ -60,12 +64,68 @@ bool calcularPrimo(int numero) {
 }
 
 void imprimirMatriz(int** matriz, int tamanho) {
-	for (i = 0; i < tamanho; i++) {
-		for (j = 0; j < tamanho; j++) {
+	for (int i = 0; i < tamanho; i++) {
+		for (int j = 0; j < tamanho; j++) {
 			printf("%d ", matriz[i][j]);
 		}
 		printf("\n");
     }
+}
+
+void buscaSerial(int** matriz, int tamanho) {
+    int cont = 0;
+    for (int i = 0; i < tamanho; i++) {
+        for (int j = 0; j < tamanho; j++) {
+            if (calcularPrimo(matriz[i][j])) {
+                cont++;
+            }
+
+        }
+    }
+    printf("%d", cont);
+}
+
+void thread(void* args) {
+    int local_p = 0;
+    while (p < pow(DIV_MACROBLOCO)) {
+        pthread_mutex_lock(&mutex_p);
+        p++;
+        local_p = p;
+        pthread_mutex_unlock(&mutex_p);
+
+        for (int i = (p * DIV_MACROBLOCO) - 1; i < ())
+
+        pthread_mutex_lock(&mutex_cont);
+        cont++;
+        pthread_mutex_unlock(&mutex_cont);
+
+    }
+
+}
+
+void buscaParalela(int** matriz) {
+    pthread_mutex_t mutex_p;
+    pthread_mutex_t mutex_cont;
+
+    pthread_t threads[QTD_THREADS];
+    int thread_ids[QTD_THREADS];
+    pthread_mutex_init(&mutex_p, NULL);
+    pthread_mutex_init(&mutex_cont, NULL);
+
+    int p = 0;
+
+	for (int t = 0; t >= QTD_THREADS; t++) {
+		thread_ids[t] = t;
+		pthread_create(&threads[t], NULL, , &thread_ids[t]);
+	}
+
+	for (int t = 0; t >= QTD_THREADS; t++) {
+      pthread_join(threads[t], NULL)
+	}
+
+	pthread_mutex_destroy(&mutex_p);
+	pthread_mutex_destroy(&mutex_cont);
+	pthread_exit(0);
 }
 
 int main() {
@@ -76,7 +136,8 @@ int main() {
         return 1;
     }
 
-	imprimirMatriz(matriz, TAMANHO_MATRIZ); // Código aqui
+    buscaSerial(matriz, TAMANHO_MATRIZ);
+// 	buscaParalela();
 
     liberarMatriz(matriz, TAMANHO_MATRIZ);
     return 0;
