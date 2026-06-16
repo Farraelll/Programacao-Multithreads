@@ -10,7 +10,10 @@
 #define SEMENTE 2
 #define QTD_THREADS 6
 #define DIV_MACROBLOCO 9
-pthread_mutex_t mutex;
+
+pthread_mutex_t mutex_p;
+pthread_mutex_t mutex_cont;
+int p = 0;
 
 int** criarMatrizAleatoria(int tamanho) {
    //Cria a matriz de endereços para outras matrizes e verifica se foi possível alocar a memória
@@ -89,11 +92,13 @@ void thread(void* args) {
     int local_p = 0;
     while (p < pow(DIV_MACROBLOCO)) {
         pthread_mutex_lock(&mutex_p);
-        p++;
         local_p = p;
+        p++;
         pthread_mutex_unlock(&mutex_p);
 
-        for (int i = (p * DIV_MACROBLOCO) - 1; i < ())
+        for (int i = (local_p * DIV_MACROBLOCO); i < (local_p * DIV_MACROBLOCO) + DIV_MACROBLOCO - 1; i++) {
+
+        }
 
         pthread_mutex_lock(&mutex_cont);
         cont++;
@@ -104,15 +109,14 @@ void thread(void* args) {
 }
 
 void buscaParalela(int** matriz) {
-    pthread_mutex_t mutex_p;
-    pthread_mutex_t mutex_cont;
+
 
     pthread_t threads[QTD_THREADS];
     int thread_ids[QTD_THREADS];
     pthread_mutex_init(&mutex_p, NULL);
     pthread_mutex_init(&mutex_cont, NULL);
 
-    int p = 0;
+
 
 	for (int t = 0; t >= QTD_THREADS; t++) {
 		thread_ids[t] = t;
