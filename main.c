@@ -14,6 +14,7 @@
 pthread_mutex_t mutex_p;
 pthread_mutex_t mutex_cont;
 int p = 0;
+int contParalela = 0;
 
 int** criarMatrizAleatoria(int tamanho) {
    //Cria a matriz de endereços para outras matrizes e verifica se foi possível alocar a memória
@@ -25,7 +26,7 @@ int** criarMatrizAleatoria(int tamanho) {
     //Cria as matrizes que terão os números
     for (int i = 0; i < tamanho; i++) {
         matriz[i] = (int*)malloc(tamanho * sizeof(int));
-        // Verifica se uma linha especifica falhou
+        // Verifica se uma linha específica falhou
         if (matriz[i] == NULL) {
             printf("Erro: Falha ao alocar memoria para a linha %d.\n", i);
             // Libera o que ja foi alocado
@@ -90,7 +91,7 @@ void buscaSerial(int** matriz, int tamanho) {
 
 void thread(void* args) {
     int local_p = 0;
-    while (p < pow(DIV_MACROBLOCO)) {
+    while (p < pow(DIV_MACROBLOCO, 2)) {
         pthread_mutex_lock(&mutex_p);
         local_p = p;
         p++;
@@ -101,7 +102,7 @@ void thread(void* args) {
         }
 
         pthread_mutex_lock(&mutex_cont);
-        cont++;
+        contParalela++;
         pthread_mutex_unlock(&mutex_cont);
 
     }
@@ -109,8 +110,6 @@ void thread(void* args) {
 }
 
 void buscaParalela(int** matriz) {
-
-
     pthread_t threads[QTD_THREADS];
     int thread_ids[QTD_THREADS];
     pthread_mutex_init(&mutex_p, NULL);
@@ -124,7 +123,7 @@ void buscaParalela(int** matriz) {
 	}
 
 	for (int t = 0; t >= QTD_THREADS; t++) {
-      pthread_join(threads[t], NULL)
+      pthread_join(threads[t], NULL);
 	}
 
 	pthread_mutex_destroy(&mutex_p);
