@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <math.h>
@@ -48,8 +47,8 @@ int** criarMatrizAleatoria() {
     return m;
 }
 
-void liberarMatriz(int** matriz) {
-    if (matriz == NULL) return;
+void liberarMatriz() {
+    if (matriz == NULL) exit(1);
     for (int i = 0; i < LINHAS_MATRIZ; i++) {
         free(matriz[i]);
     }
@@ -146,6 +145,6 @@ int main() {
     buscaSerial();
     buscaParalela();
 
-    liberarMatriz(matriz);
+    liberarMatriz();
     return 0;
 }
