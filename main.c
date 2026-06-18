@@ -1,24 +1,29 @@
+#pragma once
+#define HAVE_STRUCT_TIMESPEC
+#define _CRT_SECURE_NO_WARNINGS 1
+#define _WINSOCK_DEPRECATED_NO_WARNINGS 1
+
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <stdbool.h>
 #include <math.h>
+#include <windows.h>
 
-#define LINHAS_MATRIZ 100
-#define COLUNAS_MATRIZ 100
+#pragma comment(lib,"pthreadVC2.lib")
+
+#define LINHAS_MATRIZ 11000
+#define COLUNAS_MATRIZ 11000
 #define LINHAS_MACROBLOCOS 10
 #define COLUNAS_MACROBLOCOS 10
-
 #define SEMENTE 2
 #define QTD_THREADS 6
 
 pthread_mutex_t mutex_p;
 pthread_mutex_t mutex_cont;
 
-// Ajustado para mapear corretamente linhas e colunas
 int qtd_blocos_linha = COLUNAS_MATRIZ / COLUNAS_MACROBLOCOS;
 int qtd_blocos_coluna = LINHAS_MATRIZ / LINHAS_MACROBLOCOS;
-
 int p = 0;
 int contParalela = 0;
 int** matriz;
@@ -59,7 +64,7 @@ bool calcularPrimo(int numero) {
     if (numero == 0 || numero == 1) return false;
     if (numero == 2) return true;
     for (int n = 3; n <= sqrt(numero); n++) {
-       if (numero % n == 0) return false;
+        if (numero % n == 0) return false;
     }
     return true;
 }
@@ -88,7 +93,6 @@ void* thread(void* args) {
     while (local_p < total_macroblocos) {
         int local_cont = 0;
 
-        // Fórmulas corrigidas para conversão de ID sequencial para coordenadas 2D
         const int y_i = (local_p / qtd_blocos_linha) * LINHAS_MACROBLOCOS;
         const int x_i = (local_p % qtd_blocos_linha) * COLUNAS_MACROBLOCOS;
 
@@ -108,6 +112,7 @@ void* thread(void* args) {
         pthread_mutex_unlock(&mutex_p);
     }
     pthread_exit(NULL);
+	return NULL;
 }
 
 void buscaParalela() {
@@ -120,12 +125,12 @@ void buscaParalela() {
     p = 0;
 
     for (int t = 0; t < QTD_THREADS; t++) {
-       thread_ids[t] = t;
-       pthread_create(&threads[t], NULL, thread, &thread_ids[t]);
+        thread_ids[t] = t;
+        pthread_create(&threads[t], NULL, thread, &thread_ids[t]);
     }
 
     for (int t = 0; t < QTD_THREADS; t++) {
-      pthread_join(threads[t], NULL);
+        pthread_join(threads[t], NULL);
     }
 
     printf("Paralela: %d\n", contParalela);
@@ -135,15 +140,29 @@ void buscaParalela() {
 }
 
 int main() {
-    srand(SEMENTE); // Ajustado para usar apenas a semente fixa
+    LARGE_INTEGER frequencia;
+    LARGE_INTEGER inicio, fim;
+    double tempo;
+
+    srand(SEMENTE);
     matriz = criarMatrizAleatoria();
     if (matriz == NULL) {
         printf("Encerrando o programa devido a erro de memoria.\n");
         return 1;
     }
 
+    QueryPerformanceFrequency(&frequencia);
+    QueryPerformanceCounter(&inicio);
     buscaSerial();
+    QueryPerformanceCounter(&fim);
+    tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+    printf("Tempo de execucao Serial: %f segundos\n\n", tempo);
+
+    QueryPerformanceCounter(&inicio);
     buscaParalela();
+    QueryPerformanceCounter(&fim);
+    tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+    printf("Tempo de execucao Paralela: %f segundos\n", tempo);
 
     liberarMatriz();
     return 0;
