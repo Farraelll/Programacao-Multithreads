@@ -12,12 +12,12 @@
 
 #pragma comment(lib,"pthreadVC2.lib")
 
-#define LINHAS_MATRIZ 11000
-#define COLUNAS_MATRIZ 11000
-#define LINHAS_MACROBLOCOS 10
-#define COLUNAS_MACROBLOCOS 10
+#define LINHAS_MATRIZ 20000
+#define COLUNAS_MATRIZ 20000
+#define LINHAS_MACROBLOCOS 200
+#define COLUNAS_MACROBLOCOS 200
 #define SEMENTE 2
-#define QTD_THREADS 6
+#define QTD_THREADS 12
 
 pthread_mutex_t mutex_p;
 pthread_mutex_t mutex_cont;
@@ -65,7 +65,7 @@ bool calcularPrimo(int numero) {
     if (numero == 2) return true;
     for (int n = 3; n <= sqrt(numero); n++) {
         if (numero % n == 0) return false;
-    }
+    } 
     return true;
 }
 
@@ -78,7 +78,7 @@ void buscaSerial() {
             }
         }
     }
-    printf("Serial: %d\n", cont);
+    printf("Quantidade de primos: %d\n", cont);
 }
 
 void* thread(void* args) {
@@ -112,7 +112,7 @@ void* thread(void* args) {
         pthread_mutex_unlock(&mutex_p);
     }
     pthread_exit(NULL);
-	return NULL;
+    return NULL;
 }
 
 void buscaParalela() {
@@ -133,17 +133,30 @@ void buscaParalela() {
         pthread_join(threads[t], NULL);
     }
 
-    printf("Paralela: %d\n", contParalela);
+    printf("Quantidade de primos: %d\n", contParalela);
 
     pthread_mutex_destroy(&mutex_p);
     pthread_mutex_destroy(&mutex_cont);
 }
 
+double speedup(double tempo_serial, double tempo_paralelo) {
+    return tempo_serial / tempo_paralelo;
+}
+
+int menu() {
+    int opcao;
+    printf("Escolha a opcao de execucao:\n 1. Serial\n 2. Paralela\n 3. Ambos (com calculo de speedup)\n 0. Sair\nDigite sua opcao: ");
+    scanf(" %d", &opcao);
+	return opcao;
+}
+
 int main() {
+    int opcao = menu();
+
     LARGE_INTEGER frequencia;
     LARGE_INTEGER inicio, fim;
     double tempo;
-
+    printf("Criando matriz aleatoria...\n");
     srand(SEMENTE);
     matriz = criarMatrizAleatoria();
     if (matriz == NULL) {
@@ -151,19 +164,53 @@ int main() {
         return 1;
     }
 
-    QueryPerformanceFrequency(&frequencia);
-    QueryPerformanceCounter(&inicio);
-    buscaSerial();
-    QueryPerformanceCounter(&fim);
-    tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
-    printf("Tempo de execucao Serial: %f segundos\n\n", tempo);
+    printf("Matriz de %dx%d criada.\n", LINHAS_MATRIZ, COLUNAS_MATRIZ);
 
-    QueryPerformanceCounter(&inicio);
-    buscaParalela();
-    QueryPerformanceCounter(&fim);
-    tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
-    printf("Tempo de execucao Paralela: %f segundos\n", tempo);
+    while (opcao != 0) {
+        printf("Aguarde, processando a opcao %d...\n", opcao);
+        switch(opcao) {
+            case 1:
+                //Busca Serial
+                QueryPerformanceFrequency(&frequencia);
+                QueryPerformanceCounter(&inicio);
+                buscaSerial();
+                QueryPerformanceCounter(&fim);
+                tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+                printf("Tempo de execucao Serial: %f segundos\n\n", tempo);
+                break;
+            case 2:
+                //Busca Paralela
+                printf("Tamanho dos macroblocos: %dx%d\n", LINHAS_MACROBLOCOS, COLUNAS_MACROBLOCOS);
+                QueryPerformanceFrequency(&frequencia);
+                QueryPerformanceCounter(&inicio);
+                buscaParalela();
+                QueryPerformanceCounter(&fim);
+                tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+                printf("Tempo de execucao Paralela: %f segundos\n\n", tempo);
+                break;
+            case 3:
+                //Busca Serial
+                QueryPerformanceFrequency(&frequencia);
+                QueryPerformanceCounter(&inicio);
+                buscaSerial();
+                QueryPerformanceCounter(&fim);
+                double tempoS = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+                printf("Tempo de execucao Serial: %f segundos\n\n", tempoS);
 
+                //Busca Paralela
+                printf("Tamanho dos macroblocos: %dx%d\n", LINHAS_MACROBLOCOS, COLUNAS_MACROBLOCOS);
+                QueryPerformanceCounter(&inicio);
+                buscaParalela();
+                QueryPerformanceCounter(&fim);
+                double tempoP = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+                printf("Tempo de execucao Paralela: %f segundos\n\n", tempoP);
+                break;
+
+                //speedup
+                printf("O speedup foi de %f", speedup(tempoS, tempoP));
+        }
+		opcao = menu();
+    }
     liberarMatriz();
     return 0;
 }
