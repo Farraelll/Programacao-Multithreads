@@ -145,7 +145,7 @@ double speedup(double tempo_serial, double tempo_paralelo) {
 
 int menu() {
     int opcao;
-    printf("Escolha a opcao de execucao:\n 1. Serial\n 2. Paralela\n 3. Ambos (com calculo de speedup)\n 0. Sair\nDigite sua opcao: ");
+    printf("Escolha a opcao de execucao:\n 1. Serial\n 2. Paralela\n 3. Ambos (com cálculo de speedup)\n 0. Sair\nDigite sua opcao: ");
     scanf(" %d", &opcao);
 	return opcao;
 }
@@ -204,10 +204,12 @@ int main() {
                 QueryPerformanceCounter(&fim);
                 double tempoP = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
                 printf("Tempo de execucao Paralela: %f segundos\n\n", tempoP);
-                break;
 
                 //speedup
                 printf("O speedup foi de %f", speedup(tempoS, tempoP));
+
+                break;
+
         }
 		opcao = menu();
     }
