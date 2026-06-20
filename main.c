@@ -139,13 +139,60 @@ void buscaParalela() {
     pthread_mutex_destroy(&mutex_cont);
 }
 
+void* threadSemMutex(void* args) {
+    int local_p = 0;
+    int total_macroblocos = qtd_blocos_linha * qtd_blocos_coluna;
+
+    local_p = p;
+    p++;
+
+    while (local_p < total_macroblocos) {
+        int local_cont = 0;
+
+        const int y_i = (local_p / qtd_blocos_linha) * LINHAS_MACROBLOCOS;
+        const int x_i = (local_p % qtd_blocos_linha) * COLUNAS_MACROBLOCOS;
+
+        for (int i = y_i; i < y_i + LINHAS_MACROBLOCOS; i++) {
+            for (int j = x_i; j < x_i + COLUNAS_MACROBLOCOS; j++) {
+                if (calcularPrimo(matriz[i][j])) local_cont++;
+            }
+        }
+
+        contParalela = contParalela + local_cont;
+
+        local_p = p;
+        p++;
+    }
+    pthread_exit(NULL);
+    return NULL;
+}
+
+void buscaParalelaSemMutex() {
+    pthread_t threads[QTD_THREADS];
+    int thread_ids[QTD_THREADS];
+
+    contParalela = 0;
+    p = 0;
+
+    for (int t = 0; t < QTD_THREADS; t++) {
+        thread_ids[t] = t;
+        pthread_create(&threads[t], NULL, thread, &thread_ids[t]);
+    }
+
+    for (int t = 0; t < QTD_THREADS; t++) {
+        pthread_join(threads[t], NULL);
+    }
+
+    printf("Quantidade de primos: %d\n", contParalela);
+}
+
 double speedup(double tempo_serial, double tempo_paralelo) {
     return tempo_serial / tempo_paralelo;
 }
 
 int menu() {
     int opcao;
-    printf("Escolha a opcao de execucao:\n 1. Serial\n 2. Paralela\n 3. Ambos (com calculo de speedup)\n 0. Sair\nDigite sua opcao: ");
+    printf("Escolha a opcao de execucao:\n 1. Serial\n 2. Paralela\n 3. Paralela sem protecao\n 4. Ambos (com calculo de speedup)\n 0. Sair\nDigite sua opcao: ");
     scanf(" %d", &opcao);
 	return opcao;
 }
@@ -189,6 +236,16 @@ int main() {
                 printf("Tempo de execucao Paralela: %f segundos\n\n", tempo);
                 break;
             case 3:
+                //Busca paralela sem proteção
+                printf("Tamanho dos macroblocos: %dx%d\n", LINHAS_MACROBLOCOS, COLUNAS_MACROBLOCOS);
+                QueryPerformanceFrequency(&frequencia);
+                QueryPerformanceCounter(&inicio);
+                buscaParalelaSemMutex();
+                QueryPerformanceCounter(&fim);
+                tempo = (double)(fim.QuadPart - inicio.QuadPart) / frequencia.QuadPart;
+                printf("Tempo de execucao Paralela: %f segundos\n\n", tempo);
+                break;
+            case 4:
                 //Busca Serial
                 QueryPerformanceFrequency(&frequencia);
                 QueryPerformanceCounter(&inicio);
