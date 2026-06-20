@@ -203,12 +203,14 @@ int main() {
     LARGE_INTEGER frequencia;
     LARGE_INTEGER inicio, fim;
     double tempo;
-    printf("Criando matriz aleatoria...\n");
-    srand(SEMENTE);
-    matriz = criarMatrizAleatoria();
-    if (matriz == NULL) {
-        printf("Encerrando o programa devido a erro de memoria.\n");
-        return 1;
+    if (opcao != 0) {
+        printf("Criando matriz aleatoria...\n");
+        srand(SEMENTE);
+        matriz = criarMatrizAleatoria();
+        if (matriz == NULL) {
+            printf("Encerrando o programa devido a erro de memoria.\n");
+            return 1;
+        }
     }
 
     printf("Matriz de %dx%d criada.\n", LINHAS_MATRIZ, COLUNAS_MATRIZ);
