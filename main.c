@@ -63,8 +63,7 @@ void liberarMatriz() {
 bool calcularPrimo(int numero) {
     if (numero == 0 || numero == 1) return false;
     if (numero == 2) return true;
-	int raiz = sqrt(numero)
-    for (int n = 3; n <= raiz; n++) {
+    for (int n = 3; n <= sqrt(numero); n++) {
         if (numero % n == 0) return false;
     } 
     return true;
