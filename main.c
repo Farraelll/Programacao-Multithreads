@@ -211,9 +211,8 @@ int main() {
             printf("Encerrando o programa devido a erro de memoria.\n");
             return 1;
         }
+		printf("Matriz de %dx%d criada.\n", LINHAS_MATRIZ, COLUNAS_MATRIZ);
     }
-
-    printf("Matriz de %dx%d criada.\n", LINHAS_MATRIZ, COLUNAS_MATRIZ);
 
     while (opcao != 0) {
         printf("Aguarde, processando a opcao %d...\n", opcao);
